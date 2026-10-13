@@ -18,7 +18,7 @@
 <body>
 <main class="wrap">
 <header class="topbar"><div class="brand"><div class="mark" aria-hidden="true">M</div><div>MESA VIVA <span style="font-weight:400;letter-spacing:0;color:#91a9c3">/ observabilidade</span></div></div><span class="tag">LABORATÓRIO M1 · PÚBLICO</span></header>
-<section class="hero"><div><p class="eyebrow">Dados reais · GitHub Actions</p><h1>Veja o trabalho acontecer.</h1><p class="lede">Acompanhe as execuções e os Pull Requests do laboratório da MESA. Dados consultados diretamente no GitHub, sem informações simuladas.</p></div><div class="toolbar"><div class="sync"><div id="sync">Aguardando primeira consulta</div><div id="refresh-timer">Atualização automática a cada 3 minutos</div></div><button id="refresh" class="button" type="button">↻ Atualizar agora</button></div></section>
+<section class="hero"><div><p class="eyebrow">Dados reais · GitHub Actions, PRs e missões públicas</p><h1>Veja o trabalho acontecer.</h1><p class="lede">Acompanhe execuções, Pull Requests e tarefas públicas do laboratório da MESA. Dados consultados diretamente no GitHub, sem informações simuladas.</p></div><div class="toolbar"><div class="sync"><div id="sync">Aguardando primeira consulta</div><div id="refresh-timer">Atualização automática a cada 4 minutos</div></div><button id="refresh" class="button" type="button">↻ Atualizar agora</button></div></section>
 <div id="error" class="notice" role="alert"></div>
 <section class="grid" aria-label="Indicadores do laboratório">
 <div class="metric"><div class="metric-label">Execuções consultadas</div><div id="runs-count" class="metric-num accent">—</div><div class="metric-foot">Histórico recente do Actions</div></div>
@@ -30,7 +30,11 @@
 <div class="card"><div class="card-head"><h2>Execuções recentes</h2><a class="small-link" href="https://github.com/Mthamasia/mesa-m1-sandbox/actions" rel="noopener noreferrer" target="_blank">Abrir no GitHub ↗</a></div><div id="runs" class="list" aria-live="polite"><div class="empty">Carregando dados reais...</div></div></div>
 <div class="card"><div class="card-head"><h2>Pull Requests</h2><a class="small-link" href="https://github.com/Mthamasia/mesa-m1-sandbox/pulls" rel="noopener noreferrer" target="_blank">Ver todos ↗</a></div><div id="prs" class="list" aria-live="polite"><div class="empty">Carregando PRs...</div></div></div>
 </section>
-<section class="banners"><div class="banner"><div class="chip"><i class="live"></i> API pública do GitHub</div><h2>O que é acompanhado automaticamente</h2><p>Execuções novas, testes que passaram ou falharam, jobs em andamento, horários e PRs do repositório público <a href="https://github.com/Mthamasia/mesa-m1-sandbox" target="_blank" rel="noopener noreferrer">mesa-m1-sandbox</a>. Atualização a cada 3 minutos ou manual.</p></div><div class="banner"><div class="chip"><i></i> Ainda sem fonte de dados</div><h2>O que este painel ainda não mostra</h2><p>Estado ao vivo do serviço <strong>mesa-handoff</strong> na VPS, logs privados, filas SQLite, consumo da assinatura Claude, automações de código nos quatro projetos ou agentes trabalhando continuamente. Isso exigirá API de telemetria autenticada e segregada.</p></div></section>
+<section class="card" aria-label="Missões públicas do laboratório" style="margin-top:16px">
+<div class="card-head"><div><h2>Missões públicas · M1</h2><p style="color:var(--muted);font-size:.86rem;margin:4px 0 0">Abertura e conclusão vêm das Issues. "Aberta" não significa que um agente esteja executando.</p></div><a class="small-link" href="https://github.com/Mthamasia/mesa-m1-sandbox/issues" rel="noopener noreferrer" target="_blank">Ver tarefas ↗</a></div>
+<div id="missions" class="list" aria-live="polite"><div class="empty">Consultando tarefas reais...</div></div>
+</section>
+<section class="banners"><div class="banner"><div class="chip"><i class="live"></i> API pública do GitHub</div><h2>O que é acompanhado automaticamente</h2><p>Execuções novas, testes que passaram ou falharam, jobs em andamento, horários e PRs do repositório público <a href="https://github.com/Mthamasia/mesa-m1-sandbox" target="_blank" rel="noopener noreferrer">mesa-m1-sandbox</a>. Atualização a cada 4 minutos ou manual.</p></div><div class="banner"><div class="chip"><i></i> Ainda sem fonte de dados</div><h2>O que este painel ainda não mostra</h2><p>Estado ao vivo do serviço <strong>mesa-handoff</strong> na VPS, logs privados, filas SQLite, consumo da assinatura Claude, automações de código nos quatro projetos ou agentes trabalhando continuamente. Isso exigirá API de telemetria autenticada e segregada.</p></div></section>
 <section class="note"><strong>Mapa de evolução da MESA</strong><div class="phase"><span class="dot done"></span><label>M0 · Handoff Claude A → Claude B</label><small>Testado na VPS · não monitorado aqui</small></div><div class="phase"><span class="dot done"></span><label>M1-0 · GitHub Actions manual</label><small>Histórico consultado acima</small></div><div class="phase"><span class="dot done"></span><label>M1-1 · Código → PR → testes automáticos</label><small>Histórico consultado acima</small></div><div class="phase"><span class="dot pending"></span><label>M1-2 · Agentes programadores autônomos</label><small>Não implementado</small></div><p>Este quadro de marcos é editorial; os indicadores e listas acima vêm ao vivo da API pública. <a href="https://github.com/Mthamasia/agentproof-bridge/issues/26" target="_blank" rel="noopener noreferrer">Acompanhamento técnico da fase #26 ↗</a> (repositório privado; exige login autorizado).</p></section>
 <footer class="footer">MESA Viva · Painel de acompanhamento público, somente leitura. Sem autenticação, coleta de dados pessoais, chaves API ou comandos de execução. Uma falha de consulta é exibida como falha — nunca como “tudo funcionando”.</footer>
 </main>
@@ -38,20 +42,77 @@
 (() => {
 'use strict';
 const api = 'https://api.github.com/repos/Mthamasia/mesa-m1-sandbox';
-const intervalMs = 180000;
+const intervalMs = 240000;
 const fmt = new Intl.DateTimeFormat('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit',timeZone:'America/Sao_Paulo'});
 const el=id=>document.getElementById(id);
 let nextRefresh=0, loading=false;
 const text=(tag,value,className)=>{const n=document.createElement(tag);n.textContent=String(value);if(className)n.className=className;return n};
 function labelRun(run){if(run.status !== 'completed')return {label:run.status==='queued'?'Na fila':'Executando',cls:'running'};if(run.conclusion==='success')return {label:'Aprovado',cls:'success'};if(run.conclusion==='cancelled')return {label:'Cancelado',cls:''};return {label:run.conclusion==='failure'?'Falhou':(run.conclusion||'Concluído'),cls:'failed'}}
 function status(textValue,cls){return text('span',textValue,'status '+(cls||''))}
-function makeRow(item,kind){const row=document.createElement('div');row.className='item';const meta=document.createElement('div');meta.className='item-meta';const a=document.createElement('a');a.className='item-title';a.rel='noopener noreferrer';a.target='_blank';a.href=kind==='run'?item.html_url:item.html_url;a.textContent=kind==='run'?(item.display_title||item.name||'Execução'):(item.title||'PR sem título');meta.append(a);const sub=text('div',kind==='run'?'#'+item.run_number+' · '+(item.event==='pull_request'?'Aberto por PR':item.event==='workflow_dispatch'?'Início manual':item.event)+' · '+fmt.format(new Date(item.created_at)):'#'+item.number+' · '+(item.head?.ref||'branch')+' · '+fmt.format(new Date(item.created_at)),'sub');meta.append(sub);row.append(meta);const s=kind==='run'?labelRun(item):{label:item.draft?'Rascunho':'Aberto',cls:item.draft?'draft':'running'};row.append(status(s.label,s.cls));return row}
-function render(target,items,kind){const container=el(target);container.replaceChildren();if(items.length===0){container.append(text('div',kind==='run'?'Nenhuma execução encontrada.':'Nenhum PR aberto no momento.','empty'));return}for(const it of items.slice(0,7))container.append(makeRow(it,kind))}
+function makeRow(item,kind){
+  const row=document.createElement('div');row.className='item';
+  const meta=document.createElement('div');meta.className='item-meta';
+  const a=document.createElement('a');a.className='item-title';a.rel='noopener noreferrer';a.target='_blank';a.href=item.html_url;
+  a.textContent=kind==='run'?(item.display_title||item.name||'Execução'):(item.title||'Item sem título');
+  meta.append(a);
+  let secondary;
+  if(kind==='run')secondary='#'+item.run_number+' · '+(item.event==='pull_request'?'Aberto por PR':item.event==='workflow_dispatch'?'Início manual':item.event)+' · '+fmt.format(new Date(item.created_at));
+  else if(kind==='mission')secondary='Issue #'+item.number+' · atualizada '+fmt.format(new Date(item.updated_at));
+  else secondary='#'+item.number+' · '+(item.head?.ref||'branch')+' · '+fmt.format(new Date(item.created_at));
+  meta.append(text('div',secondary,'sub'));row.append(meta);
+  const s=kind==='run'?labelRun(item):kind==='mission'?{label:item.state==='closed'?'Concluída':'Aberta',cls:item.state==='closed'?'success':'draft'}:{label:item.draft?'Rascunho':'Aberto',cls:item.draft?'draft':'running'};
+  row.append(status(s.label,s.cls));return row;
+}
+function render(target,items,kind){
+  const container=el(target);container.replaceChildren();
+  if(items.length===0){
+    const empty=kind==='run'?'Nenhuma execução encontrada.':kind==='mission'?'Nenhuma missão pública encontrada.':'Nenhum PR aberto no momento.';
+    container.append(text('div',empty,'empty'));return;
+  }
+  for(const it of items.slice(0,7))container.append(makeRow(it,kind));
+}
 async function get(path){const response=await fetch(api+path,{headers:{Accept:'application/vnd.github+json'},cache:'no-store'});if(!response.ok){const reset=response.headers.get('x-ratelimit-reset');let hint=response.status===403?' (possível limite público da API; aguarde alguns minutos)':response.status===404?' (endereço indisponível)':'';throw new Error('GitHub API HTTP '+response.status+hint)}return response.json()}
-async function refresh(){if(loading)return;loading=true;el('refresh').disabled=true;el('refresh').textContent='Consultando...';el('error').classList.remove('visible');const [r,p]=await Promise.allSettled([get('/actions/runs?per_page=25'),get('/pulls?state=open&per_page=25')]);let errors=[];
-if(r.status==='fulfilled'){const runs=Array.isArray(r.value.workflow_runs)?r.value.workflow_runs:[];el('runs-count').textContent=String(r.value.total_count??runs.length);el('success-count').textContent=String(runs.filter(x=>x.conclusion==='success').length);el('running-count').textContent=String(runs.filter(x=>x.status!=='completed').length);render('runs',runs,'run')}else{errors.push('Execuções: '+r.reason.message);el('runs').replaceChildren(text('div','Não foi possível consultar as execuções.','empty'));el('runs-count').textContent='—';el('success-count').textContent='—';el('running-count').textContent='—'}
-if(p.status==='fulfilled'){const prs=Array.isArray(p.value)?p.value:[];el('prs-count').textContent=String(prs.length);render('prs',prs,'pr')}else{errors.push('Pull Requests: '+p.reason.message);el('prs').replaceChildren(text('div','Não foi possível consultar os PRs.','empty'));el('prs-count').textContent='—'}
-if(errors.length){el('error').textContent='Falha de consulta: '+errors.join(' | ');el('error').classList.add('visible');el('sync').textContent='Dados parcialmente indisponíveis'}else el('sync').textContent='Sincronizado: '+fmt.format(new Date());nextRefresh=Date.now()+intervalMs;el('refresh').textContent='↻ Atualizar agora';el('refresh').disabled=false;loading=false;updateTimer()}
+async function refresh(){
+  if(loading)return;loading=true;el('refresh').disabled=true;el('refresh').textContent='Consultando...';el('error').classList.remove('visible');
+  const [r,p,m]=await Promise.allSettled([
+    get('/actions/runs?per_page=25'),
+    get('/pulls?state=open&per_page=25'),
+    get('/issues?state=all&sort=updated&direction=desc&per_page=40')
+  ]);
+  const errors=[];
+  if(r.status==='fulfilled'){
+    const runs=Array.isArray(r.value.workflow_runs)?r.value.workflow_runs:[];
+    el('runs-count').textContent=String(r.value.total_count??runs.length);
+    el('success-count').textContent=String(runs.filter(x=>x.conclusion==='success').length);
+    el('running-count').textContent=String(runs.filter(x=>x.status!=='completed').length);
+    render('runs',runs,'run');
+  }else{
+    errors.push('Execuções: '+r.reason.message);
+    el('runs').replaceChildren(text('div','Não foi possível consultar as execuções.','empty'));
+    el('runs-count').textContent='—';el('success-count').textContent='—';el('running-count').textContent='—';
+  }
+  if(p.status==='fulfilled'){
+    const prs=Array.isArray(p.value)?p.value:[];
+    el('prs-count').textContent=String(prs.length);render('prs',prs,'pr');
+  }else{
+    errors.push('Pull Requests: '+p.reason.message);
+    el('prs').replaceChildren(text('div','Não foi possível consultar os PRs.','empty'));
+    el('prs-count').textContent='—';
+  }
+  if(m.status==='fulfilled'){
+    const missions=(Array.isArray(m.value)?m.value:[]).filter(x=>!x.pull_request&&typeof x.title==='string'&&x.title.startsWith('[MESA-LAB]'));
+    render('missions',missions,'mission');
+  }else{
+    errors.push('Missões públicas: '+m.reason.message);
+    el('missions').replaceChildren(text('div','Não foi possível consultar as missões.','empty'));
+  }
+  if(errors.length){
+    el('error').textContent='Falha de consulta: '+errors.join(' | ');
+    el('error').classList.add('visible');el('sync').textContent='Dados parcialmente indisponíveis';
+  }else el('sync').textContent='Sincronizado: '+fmt.format(new Date());
+  nextRefresh=Date.now()+intervalMs;
+  el('refresh').textContent='↻ Atualizar agora';el('refresh').disabled=false;loading=false;updateTimer();
+}
 function updateTimer(){if(!nextRefresh)return;const left=Math.max(0,Math.ceil((nextRefresh-Date.now())/1000));el('refresh-timer').textContent='Atualização automática em '+Math.floor(left/60)+':'+String(left%60).padStart(2,'0')}
 window.setInterval(()=>{updateTimer();if(nextRefresh&&Date.now()>=nextRefresh&&!loading)refresh()},1000);el('refresh').addEventListener('click',()=>refresh());refresh();
 })();
