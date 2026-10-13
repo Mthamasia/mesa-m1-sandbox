@@ -1,0 +1,17 @@
+{
+  "fixture_kind": "synthetic_mock_event_not_github_authenticated",
+  "event": {
+    "repository": "Mthamasia/mesa-m1-sandbox",
+    "actor": "Mthamasia",
+    "author": "Mthamasia",
+    "title": "[MESA-CODE] proposta sintética",
+    "event": "opened",
+    "issue_number": 9001,
+    "body": "MESA-CODE-V1\n{\"protocol\":\"MESA-CODE-V1\",\"mission_id\":\"MESA-CODE-9001\",\"project\":\"mesa-m1-sandbox\",\"base_sha\":\"fb9d86d3d11419fcbfb7a470b2feebad6aa3f325\",\"task_kind\":\"synthetic_python_change\",\"task\":\"Propor um método sintético para retornar saudação sem executar\",\"test_profile\":\"stdlib-unittest\",\"limits\":{\"wall_seconds\":120,\"max_files_changed\":2,\"max_diff_lines\":40}}"
+  },
+  "provider": {
+    "name": "chatgpt_manual_text",
+    "run_id": "chatgpt-fixture-9001"
+  },
+  "proposal_text": "{\"protocol\":\"MESA-CODE-V1\",\"mission_id\":\"MESA-CODE-9001\",\"base_sha\":\"fb9d86d3d11419fcbfb7a470b2feebad6aa3f325\",\"summary\":\"Proposta de texto sintético produzida pelo ChatGPT\",\"files\":{\"mesa_sandbox/mesa_code_9001.py\":\"\\\"\\\"\\\"Proposta inerte, nunca executada no gate de entrada.\\\"\\\"\\\"\\n\\ndef welcome():\\n    return \\\"MESA Viva 9001\\\"\\n\",\"tests/test_mesa_code_9001.py\":\"from mesa_sandbox.mesa_code_9001 import welcome\\n\\ndef test_welcome():\\n    assert welcome() == \\\"MESA Viva 9001\\\"\\n\"}}"
+}
