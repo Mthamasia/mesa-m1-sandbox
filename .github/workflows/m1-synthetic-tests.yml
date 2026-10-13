@@ -4,12 +4,14 @@ name: MESA M1 | Testes sintéticos
 on:
   workflow_dispatch:
   pull_request:
-    branches: [main]
+    branches: [main, 'mesa/m1-3-agent-contract']
     paths:
       - "mesa_sandbox/**"
       - "mesa_lab/**"
+      - "fixtures/m1-4/**"
       - "tests/**"
       - "docs/m1-3-protocol.md"
+      - "docs/m1-4-proposal-bridge.md"
       - ".github/workflows/m1-synthetic-tests.yml"
 
 permissions:
@@ -29,6 +31,7 @@ jobs:
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
         with:
           persist-credentials: false
+          fetch-depth: 0
 
       - name: Mostrar versão do Python
         run: python3 --version
@@ -37,3 +40,8 @@ jobs:
         env:
           PYTHONDONTWRITEBYTECODE: "1"
         run: python3 -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Validar proposta de IA inerte e SHA real de main
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -m mesa_lab.demo_receipt
