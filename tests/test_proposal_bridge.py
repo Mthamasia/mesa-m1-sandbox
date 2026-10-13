@@ -53,6 +53,12 @@ class ProposalBridgeTests(unittest.TestCase):
     def test_unknown_provider_blocks(self):
         self.assert_blocked(provider_name="unverified_provider")
 
+    def test_unwired_claude_provider_blocks(self):
+        self.assert_blocked(provider_name="claude_text")
+
+    def test_unwired_codex_provider_blocks(self):
+        self.assert_blocked(provider_name="codex_text")
+
     def test_pathlike_run_id_blocks(self):
         self.assert_blocked(provider_run_id="../../secret")
 
