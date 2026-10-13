@@ -59,6 +59,9 @@ class ProposalBridgeTests(unittest.TestCase):
     def test_false_identity_proof_blocks(self):
         self.assert_blocked(identity_proof="model_self_attested")
 
+    def test_real_github_proof_fails_closed_until_adapter_exists(self):
+        self.assert_blocked(identity_proof="verified_github_event")
+
     def test_markdown_fences_block(self):
         fence = chr(96) * 3
         self.assert_blocked(proposal_text=fence + "json\n" + FIX["proposal_text"] + "\n" + fence)
