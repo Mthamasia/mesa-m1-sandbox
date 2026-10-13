@@ -4,20 +4,21 @@ Laboratório **público e sintético** da MESA Viva para validar um runner tempo
 
 Este repositório não contém códigos, dados, tokens, credenciais ou configurações de produção dos projetos Alpha Hunter X, Private Match, AgentProof ou MEMNX.
 
-## Piloto M1-0
+## M1-0 — primeiro teste de infraestrutura
 
-- O workflow `MESA M1 | Testes sintéticos` só pode ser iniciado manualmente (`workflow_dispatch`).
+- O workflow `MESA M1 | Testes sintéticos` pode ser iniciado manualmente (`workflow_dispatch`).
 - A execução usa um runner padrão `ubuntu-24.04`, temporário, hospedado pelo GitHub — **não** uma VPS do proprietário.
 - Apenas Python da biblioteca padrão: sem `pip install`, sem chamadas de IA, sem tokens de API personalizados, sem deploy e sem envio de mensagens.
 - O `GITHUB_TOKEN` do workflow possui apenas `contents: read`; o checkout não preserva credenciais.
-- Limite do job: 5 minutos. Apenas uma execução por vez para esse workflow.
-- O código de teste foi escrito exclusivamente para este laboratório público.
+- Limite do job: 5 minutos; concorrência controlada por referência.
 
-### Como validar
+Primeira execução: [run #38434642630](https://github.com/Mthamasia/mesa-m1-sandbox/actions/runs/38434642630), 6/6 testes PASS.
 
-Abra **Actions → MESA M1 | Testes sintéticos → Run workflow → Run workflow**, selecionando a branch `main`.
+## M1-1 — alteração via Pull Request
 
-O resultado esperado é um job `synthetic-tests` verde, com seis testes unitários passando. Inspecione os logs e a duração antes de considerar o piloto concluído.
+- Uma branch isolada acrescenta a função pura `apply_discount_cents`, com validação e arredondamento por aritmética inteira, além de novos testes.
+- O mesmo workflow passa a executar automaticamente em `pull_request` para `main` **somente** quando mudarem o código sintético, os testes ou o próprio workflow.
+- A alteração fica no PR até revisão; **nenhum merge ou deploy automático**.
 
 ### Limites
 
