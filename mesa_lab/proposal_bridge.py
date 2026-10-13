@@ -13,8 +13,9 @@ EVENT_KEYS = {"repository", "actor", "author", "title", "event", "issue_number",
 def validate_inert_handoff(*, verified_event, observed_base_sha, provider_name,
                            provider_run_id, proposal_text, identity_proof):
     """Gera recibo idempotente. Identidade deve vir do chamador, não da IA."""
-    if identity_proof not in {"mock_fixture", "verified_github_event"}:
-        raise ContractError("Fonte de identidade desconhecida")
+    # Até existir adapter GitHub autenticado, falhar fechado para qualquer prova real.
+    if identity_proof != "mock_fixture":
+        raise ContractError("Autenticação real ainda não implementada")
     if type(verified_event) is not dict or set(verified_event) != EVENT_KEYS:
         raise ContractError("Envelope do evento inválido")
     number = verified_event["issue_number"]
