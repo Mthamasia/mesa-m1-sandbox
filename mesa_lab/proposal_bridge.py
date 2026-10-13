@@ -4,7 +4,7 @@ import json
 import re
 from mesa_lab.mission_contract import ContractError, parse_issue, validate_proposal
 
-PROVIDERS = frozenset({"chatgpt_manual_text", "claude_text", "codex_text"})
+PROVIDERS = frozenset({"chatgpt_manual_text"})
 RUN_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9_.:-]{2,79}\Z")
 SHA = re.compile(r"[0-9a-f]{40}\Z")
 EVENT_KEYS = {"repository", "actor", "author", "title", "event", "issue_number", "body"}
@@ -24,7 +24,7 @@ def validate_inert_handoff(*, verified_event, observed_base_sha, provider_name,
     if type(observed_base_sha) is not str or SHA.fullmatch(observed_base_sha) is None:
         raise ContractError("SHA observada inválida")
     # M1-4 só permite a fixture local; Claude/Codex reais exigem autenticação própria.
-    if type(provider_name) is not str or provider_name != "chatgpt_manual_text":
+    if type(provider_name) is not str or provider_name not in PROVIDERS:
         raise ContractError("Provider real ainda não integrado")
     if type(provider_run_id) is not str or RUN_ID.fullmatch(provider_run_id) is None:
         raise ContractError("Run ID inválido")
