@@ -3,6 +3,14 @@ name: MESA M1 | Testes sintéticos
 # Nenhum gatilho automático: executar manualmente no GitHub.
 on:
   workflow_dispatch:
+  pull_request:
+    branches: [main]
+    paths:
+      - "mesa_sandbox/**"
+      - "mesa_lab/**"
+      - "tests/**"
+      - "docs/m1-3-protocol.md"
+      - ".github/workflows/m1-synthetic-tests.yml"
 
 permissions:
   contents: read
