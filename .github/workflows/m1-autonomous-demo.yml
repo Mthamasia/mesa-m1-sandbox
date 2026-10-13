@@ -1,0 +1,88 @@
+name: MESA M1-2 | Missão sintética automática
+
+# Public Issues are untrusted. Only owner-authored exact-contract issues
+# can use the write-enabled job. No LLM calls and no issue text is executed.
+on:
+  issues:
+    types: [opened]
+
+permissions: {}
+
+concurrency:
+  group: mesa-m1-demo-${{ github.event.issue.number }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Gate + criar PR sintético
+    if: >-
+      github.actor == 'Mthamasia' &&
+      github.event.issue.user.login == 'Mthamasia' &&
+      github.event.issue.title == '[MESA-LAB] M1-2: missão sintética automática'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: write
+      pull-requests: write
+    outputs:
+      branch: ${{ steps.generate.outputs.branch }}
+      pr_url: ${{ steps.generate.outputs.pr_url }}
+    steps:
+      - name: Checkout confiável, sem persistência de credenciais
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - id: generate
+        name: Verificar contrato e publicar PR draft
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 .github/scripts/m1_publish.py
+
+  tests:
+    name: Testes no runner separado, somente leitura
+    needs: publish
+    if: needs.publish.result == 'success' && needs.publish.outputs.branch != ''
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout da branch sintética
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.publish.outputs.branch }}
+          persist-credentials: false
+      - name: Executar testes sem downloads
+        env:
+          PYTHONDONTWRITEBYTECODE: "1"
+        run: python3 -m unittest discover -s tests -p "test_*.py" -v
+
+  audit:
+    name: Auditoria determinística, somente leitura
+    needs: [publish, tests]
+    if: needs.tests.result == 'success'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout para inspeção do diff
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          ref: ${{ needs.publish.outputs.branch }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Confirmar somente dois arquivos sintéticos
+        env:
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          python3 - <<'PY'
+          import os, subprocess
+          number = os.environ["ISSUE_NUMBER"]
+          assert number.isdecimal() and 1 <= int(number) <= 999999
+          expected = {f"mesa_sandbox/m1demo_{number}.py", f"tests/test_m1demo_{number}.py"}
+          changed = set(subprocess.check_output(
+              ["git", "diff", "--name-only", "origin/main...HEAD"], text=True).splitlines())
+          assert changed == expected, f"Unexpected diff: {sorted(changed)}"
+          print("PASS: two fixed synthetic files:", ", ".join(sorted(changed)))
+          PY
