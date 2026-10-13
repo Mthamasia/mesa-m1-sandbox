@@ -23,8 +23,9 @@ def validate_inert_handoff(*, verified_event, observed_base_sha, provider_name,
         raise ContractError("Número da Issue inválido")
     if type(observed_base_sha) is not str or SHA.fullmatch(observed_base_sha) is None:
         raise ContractError("SHA observada inválida")
-    if type(provider_name) is not str or provider_name not in PROVIDERS:
-        raise ContractError("Provider não autorizado")
+    # M1-4 só permite a fixture local; Claude/Codex reais exigem autenticação própria.
+    if type(provider_name) is not str or provider_name != "chatgpt_manual_text":
+        raise ContractError("Provider real ainda não integrado")
     if type(provider_run_id) is not str or RUN_ID.fullmatch(provider_run_id) is None:
         raise ContractError("Run ID inválido")
     if type(proposal_text) is not str:
